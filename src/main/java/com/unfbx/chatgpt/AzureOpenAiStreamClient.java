@@ -18,6 +18,7 @@ import com.unfbx.chatgpt.exception.BaseException;
 import com.unfbx.chatgpt.exception.CommonError;
 import com.unfbx.chatgpt.function.KeyRandomStrategy;
 import com.unfbx.chatgpt.function.KeyStrategyFunction;
+import com.unfbx.chatgpt.interceptor.AzureHeaderAuthorizationInterceptor;
 import com.unfbx.chatgpt.interceptor.HeaderAuthorizationInterceptor;
 import com.unfbx.chatgpt.sse.ConsoleEventSourceListener;
 import io.reactivex.Single;
@@ -56,19 +57,19 @@ public class AzureOpenAiStreamClient {
      */
     @Getter
     private String apiHost;
+    @Getter
+    private String chatUrl;
     /**
      * 自定义的okHttpClient
      * 如果不自定义 ，就是用sdk默认的OkHttpClient实例
      */
     @Getter
     private OkHttpClient okHttpClient;
-
     /**
      * api key的获取策略
      */
     @Getter
     private KeyStrategyFunction<List<String>, String> keyStrategy;
-
     @Getter
     private OpenAiApi openAiApi;
 
@@ -82,26 +83,19 @@ public class AzureOpenAiStreamClient {
             throw new BaseException(CommonError.API_KEYS_NOT_NUL);
         }
         apiKey = builder.apiKey;
-
-        if (StrUtil.isBlank(builder.apiHost)) {
-            builder.apiHost = OpenAIConst.OPENAI_HOST;
-        }
         apiHost = builder.apiHost;
+        chatUrl = builder.chatUrl;
 
         if (Objects.isNull(builder.keyStrategy)) {
             builder.keyStrategy = new KeyRandomStrategy();
         }
         keyStrategy = builder.keyStrategy;
+        //自定义的okhttpClient  需要增加api keys
+        builder.okHttpClient = builder.okHttpClient
+                .newBuilder()
+                .addInterceptor(new AzureHeaderAuthorizationInterceptor(this.apiKey, this.keyStrategy))
+                .build();
 
-        if (Objects.isNull(builder.okHttpClient)) {
-            builder.okHttpClient = this.okHttpClient();
-        } else {
-            //自定义的okhttpClient  需要增加api keys
-            builder.okHttpClient = builder.okHttpClient
-                    .newBuilder()
-                    .addInterceptor(new HeaderAuthorizationInterceptor(this.apiKey, this.keyStrategy))
-                    .build();
-        }
         okHttpClient = builder.okHttpClient;
 
         this.openAiApi = new Retrofit.Builder()
@@ -115,16 +109,6 @@ public class AzureOpenAiStreamClient {
     /**
      * 创建默认的OkHttpClient
      */
-    private OkHttpClient okHttpClient() {
-        OkHttpClient okHttpClient = new OkHttpClient
-                .Builder()
-                .addInterceptor(new HeaderAuthorizationInterceptor(this.apiKey, this.keyStrategy))
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(50, TimeUnit.SECONDS)
-                .readTimeout(50, TimeUnit.SECONDS)
-                .build();
-        return okHttpClient;
-    }
 
     /**
      * 问答接口 stream 形式
@@ -150,7 +134,7 @@ public class AzureOpenAiStreamClient {
             ObjectMapper mapper = new ObjectMapper();
             String requestBody = mapper.writeValueAsString(completion);
             Request request = new Request.Builder()
-                    .url(this.apiHost + "v1/completions")
+                    .url(this.apiHost + this.chatUrl)
                     .post(RequestBody.create(MediaType.parse(ContentType.JSON.getValue()), requestBody))
                     .build();
             //创建事件
@@ -199,7 +183,7 @@ public class AzureOpenAiStreamClient {
             ObjectMapper mapper = new ObjectMapper();
             String requestBody = mapper.writeValueAsString(chatCompletion);
             Request request = new Request.Builder()
-                    .url(this.apiHost + "v1/chat/completions")
+                    .url(this.apiHost + this.chatUrl)
                     .post(RequestBody.create(MediaType.parse(ContentType.JSON.getValue()), requestBody))
                     .build();
             //创建事件
@@ -308,6 +292,7 @@ public class AzureOpenAiStreamClient {
          */
         private String apiHost;
 
+        private String chatUrl;
         /**
          * 自定义OkhttpClient
          */
@@ -345,6 +330,11 @@ public class AzureOpenAiStreamClient {
 
         public Builder okHttpClient(OkHttpClient val) {
             okHttpClient = val;
+            return this;
+        }
+
+        public Builder chatUrl(String val) {
+            chatUrl = val;
             return this;
         }
 

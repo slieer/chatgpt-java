@@ -19,7 +19,6 @@ import java.util.List;
  */
 @Getter
 public class AzureHeaderAuthorizationInterceptor implements Interceptor {
-
     /**
      * key 集合
      */
@@ -29,11 +28,6 @@ public class AzureHeaderAuthorizationInterceptor implements Interceptor {
      */
     private KeyStrategyFunction<List<String>, String> keyStrategy;
 
-    /**
-     * 请求头处理
-     * @param apiKey        api keys列表
-     * @param keyStrategy   自定义key的使用策略
-     */
     public AzureHeaderAuthorizationInterceptor(List<String> apiKey, KeyStrategyFunction<List<String>, String> keyStrategy) {
         this.apiKey = apiKey;
         this.keyStrategy = keyStrategy;
@@ -43,7 +37,7 @@ public class AzureHeaderAuthorizationInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Request original = chain.request();
         Request request = original.newBuilder()
-                .header(Header.AUTHORIZATION.getValue(), "Bearer " + keyStrategy.apply(apiKey))
+                .header("api-key", keyStrategy.apply(apiKey))
                 .header(Header.CONTENT_TYPE.getValue(), ContentType.JSON.getValue())
                 .method(original.method(), original.body())
                 .build();
