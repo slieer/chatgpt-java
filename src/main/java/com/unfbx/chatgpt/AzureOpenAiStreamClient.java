@@ -220,36 +220,8 @@ public class AzureOpenAiStreamClient {
      */
     @SneakyThrows
     @Deprecated
-    public CreditGrantsResponse creditGrants() {
-        Request request = new Request.Builder()
-                .url(this.apiHost + "dashboard/billing/credit_grants")
-                .get()
-                .build();
-        Response response = this.okHttpClient.newCall(request).execute();
-        ResponseBody body = response.body();
-        String bodyStr = body.string();
-//        log.info("调用查询余额请求返回值：{}", bodyStr);
-        if (!response.isSuccessful()) {
-            if (response.code() == CommonError.OPENAI_AUTHENTICATION_ERROR.code()
-                    || response.code() == CommonError.OPENAI_LIMIT_ERROR.code()
-                    || response.code() == CommonError.OPENAI_SERVER_ERROR.code()) {
-                OpenAiResponse openAiResponse = JSONUtil.toBean(bodyStr, OpenAiResponse.class);
-                log.error(openAiResponse.getError().getMessage());
-                throw new BaseException(openAiResponse.getError().getMessage());
-            }
-            String errorMsg = bodyStr;
-            log.error("询余额请求异常：{}", errorMsg);
-            OpenAiResponse openAiResponse = JSONUtil.toBean(errorMsg, OpenAiResponse.class);
-            if (Objects.nonNull(openAiResponse.getError())) {
-                log.error(openAiResponse.getError().getMessage());
-                throw new BaseException(openAiResponse.getError().getMessage());
-            }
-            throw new BaseException(CommonError.RETRY_ERROR);
-        }
-        ObjectMapper mapper = new ObjectMapper();
-        // 读取Json 返回值
-        CreditGrantsResponse completionResponse = mapper.readValue(bodyStr, CreditGrantsResponse.class);
-        return completionResponse;
+    public CreditGrantsResponse creditGrants(){
+        return null;
     }
 
     /**
@@ -258,8 +230,7 @@ public class AzureOpenAiStreamClient {
      * @return
      */
     public Subscription subscription() {
-        Single<Subscription> subscription = this.openAiApi.subscription();
-        return subscription.blockingGet();
+        return null;
     }
 
     /**
@@ -270,8 +241,7 @@ public class AzureOpenAiStreamClient {
      * @return
      */
     public BillingUsage billingUsage(@NotNull LocalDate starDate, @NotNull LocalDate endDate) {
-        Single<BillingUsage> billingUsage = this.openAiApi.billingUsage(starDate, endDate);
-        return billingUsage.blockingGet();
+        return null;
     }
 
     /**
@@ -293,6 +263,7 @@ public class AzureOpenAiStreamClient {
         private String apiHost;
 
         private String chatUrl;
+
         /**
          * 自定义OkhttpClient
          */
