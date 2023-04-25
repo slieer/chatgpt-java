@@ -21,10 +21,7 @@ import com.unfbx.chatgpt.sse.ConsoleEventSourceListener;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
+import okhttp3.*;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
 import okhttp3.sse.EventSources;
@@ -174,6 +171,7 @@ public class AzureOpenAiStreamClient {
             throw new BaseException(CommonError.PARAM_ERROR);
         }
         if (!chatCompletion.isStream()) {
+            log.warn("Only stream parameter is true!");
             chatCompletion.setStream(true);
         }
         try {
@@ -208,6 +206,27 @@ public class AzureOpenAiStreamClient {
                 .stream(true)
                 .build();
         this.streamChatCompletion(chatCompletion, eventSourceListener);
+    }
+
+    public Response chatCompletion(ChatCompletion chatCompletion) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String requestBody = mapper.writeValueAsString(chatCompletion);
+            Request request = new Request.Builder()
+                    .url(this.apiHost + this.chatUrl)
+                    .post(RequestBody.create(MediaType.parse(ContentType.JSON.getValue()), requestBody))
+                    .build();
+
+            return this.okHttpClient.newCall(request).execute();
+        } catch (JsonProcessingException e) {
+            log.error("请求参数解析异常：{}", e);
+            e.printStackTrace();
+        } catch (Exception e) {
+            log.error("请求参数解析异常：{}", e);
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     /**
