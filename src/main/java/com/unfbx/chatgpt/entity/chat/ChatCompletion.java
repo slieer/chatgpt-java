@@ -76,7 +76,7 @@ public class ChatCompletion implements Serializable {
      */
     @JsonProperty("max_tokens")
     @Builder.Default
-    private Integer maxTokens = 2048;
+    private Integer maxTokens = 4096;
 
 
     @JsonProperty("presence_penalty")
