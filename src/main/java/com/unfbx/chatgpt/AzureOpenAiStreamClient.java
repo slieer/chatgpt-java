@@ -171,6 +171,7 @@ public class AzureOpenAiStreamClient {
             throw new BaseException(CommonError.PARAM_ERROR);
         }
         if (!chatCompletion.isStream()) {
+            //这里仅支持stream = true， 否则okhttp.sse会报错。
             log.warn("Only stream parameter is true!");
             chatCompletion.setStream(true);
         }
@@ -185,11 +186,11 @@ public class AzureOpenAiStreamClient {
             //创建事件
             EventSource eventSource = factory.newEventSource(request, eventSourceListener);
         } catch (JsonProcessingException e) {
-            log.error("请求参数解析异常：{}", e);
-            e.printStackTrace();
+            log.error("请求参数Json解析异常：{}", e);
+            //e.printStackTrace();
         } catch (Exception e) {
             log.error("请求参数解析异常：{}", e);
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
