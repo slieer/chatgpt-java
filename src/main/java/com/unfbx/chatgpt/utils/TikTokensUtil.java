@@ -147,7 +147,7 @@ public class TikTokensUtil {
         }
         Encoding enc = getEncoding(modelName);
         if (Objects.isNull(enc)) {
-            log.warn("[{}]模型不存在或者暂不支持计算tokens，直接返回tokens==0");
+            log.warn("[{}]模型不存在或者暂不支持计算tokens，直接返回tokens==0", modelName);
             return new ArrayList<>();
         }
         List<Integer> encoded = enc.encode(text);

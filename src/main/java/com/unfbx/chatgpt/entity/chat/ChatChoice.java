@@ -26,4 +26,18 @@ public class ChatChoice implements Serializable {
     private Message message;
     @JsonProperty("finish_reason")
     private String finishReason;
+
+    //azure openai
+    @JsonProperty("content_filter_result")
+    private ContentFilterResult contentFilterResult;
+    @Data
+    public static class ContentFilterResult {
+        Error error;
+    }
+    @Data
+    public static class Error{
+        String code;
+        String message;
+    }
+
 }
