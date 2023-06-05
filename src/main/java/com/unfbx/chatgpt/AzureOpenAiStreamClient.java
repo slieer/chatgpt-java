@@ -30,6 +30,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -209,25 +210,15 @@ public class AzureOpenAiStreamClient {
         this.streamChatCompletion(chatCompletion, eventSourceListener);
     }
 
-    public Response chatCompletion(ChatCompletion chatCompletion) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            String requestBody = mapper.writeValueAsString(chatCompletion);
-            Request request = new Request.Builder()
-                    .url(this.apiHost + this.chatUrl)
-                    .post(RequestBody.create(MediaType.parse(ContentType.JSON.getValue()), requestBody))
-                    .build();
+    public Response chatCompletion(ChatCompletion chatCompletion) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        String requestBody = mapper.writeValueAsString(chatCompletion);
+        Request request = new Request.Builder()
+                .url(this.apiHost + this.chatUrl)
+                .post(RequestBody.create(MediaType.parse(ContentType.JSON.getValue()), requestBody))
+                .build();
 
-            return this.okHttpClient.newCall(request).execute();
-        } catch (JsonProcessingException e) {
-            log.error("请求参数解析异常：{}", e);
-            e.printStackTrace();
-        } catch (Exception e) {
-            log.error("请求参数解析异常：{}", e);
-            e.printStackTrace();
-        }
-
-        return null;
+        return this.okHttpClient.newCall(request).execute();
     }
 
     /**
