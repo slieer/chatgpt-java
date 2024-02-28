@@ -32,6 +32,8 @@ public class ChatChoice implements Serializable {
     @JsonProperty("content_filter_results")
     private ContentFilterResultV1 contentFilterResult;
 
+    private String logprobs;
+
     @Data
     public static class ContentFilterResult {
         Error error;
