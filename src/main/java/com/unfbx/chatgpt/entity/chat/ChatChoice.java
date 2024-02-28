@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 描述：
@@ -28,16 +29,34 @@ public class ChatChoice implements Serializable {
     private String finishReason;
 
     //azure openai
-    @JsonProperty("content_filter_result")
-    private ContentFilterResult contentFilterResult;
+    @JsonProperty("content_filter_results")
+    private ContentFilterResultV1 contentFilterResult;
+
     @Data
     public static class ContentFilterResult {
         Error error;
+
+        @Data
+        public static class Error{
+            String code;
+            String message;
+        }
     }
+
     @Data
-    public static class Error{
-        String code;
-        String message;
+    public static class ContentFilterResultV1 {
+        Error_ hate;
+        @JsonProperty("self_harm")
+        Error_ selfHarm;
+        Error_ sexual;
+        Error_ violence;
+
+        @Data
+        public static class Error_{
+            boolean filtered;
+            String severity;
+        }
     }
+
 
 }

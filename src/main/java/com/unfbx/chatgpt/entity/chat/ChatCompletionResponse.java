@@ -1,5 +1,6 @@
 package com.unfbx.chatgpt.entity.chat;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unfbx.chatgpt.entity.common.Usage;
 import lombok.Data;
 
@@ -20,4 +21,17 @@ public class ChatCompletionResponse implements Serializable {
     private String model;
     private List<ChatChoice> choices;
     private Usage usage;
+    @JsonProperty("prompt_filter_results")
+    private List<PromptFilterResults> promptFilterResults;
+
+    @JsonProperty("system_fingerprint")
+    private String systemFingerprint;
+
+    @Data
+    public static class PromptFilterResults{
+        @JsonProperty("prompt_index")
+        int promptIndex;
+        @JsonProperty("content_filter_results")
+        ChatChoice.ContentFilterResultV1 contentFilterResults;
+    }
 }
